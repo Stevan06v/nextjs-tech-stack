@@ -1,0 +1,78 @@
+= NextJS Tech-Stack by Stevan Vlajic
+Stevan Vlajic
+1.0.0, {docdate}: Softwareentwicklung
+:icons: font
+:sectnums:
+:toc: left
+:experimental:
+
+== Used technologies
+* Prisma for ORM (Object-Relational-Mapping)
+** `https://www.prisma.io/[prisma]`
+* MYSQL/MariaDB -> Database
+** `https://nextjs.org/[mariaDB]`
+* NextJS >= 13.2 -> main technology for backend/frontend
+** `https://nextjs.org/[nextjs]`
+* ShadCN -> UI component-library
+** `https://ui.shadcn.com/docs/installation/next[shadcn]`
+
+== Initialize the Tech-Stack (step-by-step)
+* NextJS:
+** Create latest NextJS application with the `src` directory
+*** `npx create-next-app@latest`
+
+** Use the following creation-dialog settings:
+
+*** image:./img/next-conf.png[]
+
+* Prisma:
+** Install prisma itself
+*** `npm install prisma`
+** Install the prisma-client
+*** `npm add @prisma/client`
+**** The Prisma-Client is used to write the actual prisma-queries in NEXT-JS
+*** Run the prisma binary:
+**** `npx prisma init`
+***** `.env`-file got created
+***** `/prisma/schema.prisma` got created
+**** Change in `/prisma/schema.prisma`:
+***** `provider = "postgres"` to `provider = "mysql"`
+**** Change in `.env`:
+***** `DATABASE_URL="mysql://johndoe:randompassword@localhost:5432/mydb?schema=public"` to `DATABASE_URL="mysql://root:test@localhost:3306/nextjs_prisma"`
+*** Start the db:
+**** `cd ./db`
+**** `docker-compose up`
+*** Connect to your database and create the tables:
+
+[source, sql]
+----
+use db;
+create table test(
+    id int auto_increment primary key ,
+    name varchar(100)
+);
+drop table test;
+----
+*** Turn the tables into a prisma scheme:
+**** `npx prisma db pull`
+**** The prisma-scheme file should look now something like this:
+
+[source, prisma]
+----
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+model test {
+  id   Int     @id @default(autoincrement())
+  name String? @db.VarChar(100)
+  user user[]
+}
+----
+
+*** Or just:
+**** Create your model in schema.prisma
+**** `npx prisma migrate dev`
